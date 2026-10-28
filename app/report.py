@@ -10,11 +10,19 @@ from .analysis.deck import DeckReport, analyze_deck
 SPECIAL_CHESTS = ("Legendary", "Epic", "Mega Lightning", "Royal Wild", "Magical", "Giant", "Tower Troop", "Overflowing")
 
 
+# First matching word in a chest's name picks its color on the page.
+CHEST_KINDS = ("Legendary", "Epic", "Lightning", "Wild", "Magical", "Giant", "Tower", "Gold", "Silver")
+
+
 @dataclass
 class ChestPreview:
     name: str
     in_chests: int
     special: bool
+
+    @property
+    def kind(self) -> str:
+        return next((k.lower() for k in CHEST_KINDS if k in self.name), "wooden")
 
 
 @dataclass

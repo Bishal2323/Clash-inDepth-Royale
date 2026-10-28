@@ -39,6 +39,8 @@ class DeckCard:
     elixir: int
     icon: str | None
     evolved: bool
+    hero: bool = False
+    rarity: str = "common"
 
 
 @dataclass
@@ -62,12 +64,22 @@ def analyze_deck(api_cards: list[dict]) -> DeckReport:
     for c in api_cards:
         evolved = c.get("evolutionLevel", 0) > 0
         icons = c.get("iconUrls", {})
+        # Hero cards come with evolutionLevel 2 and a heroMedium icon instead of evolutionMedium.
+        hero = "heroMedium" in icons and c.get("evolutionLevel", 0) >= 2
+        if hero:
+            icon = icons["heroMedium"]
+        elif evolved:
+            icon = icons.get("evolutionMedium") or icons.get("medium")
+        else:
+            icon = icons.get("medium")
         cards.append(DeckCard(
             name=c["name"],
             level=display_level(c),
             elixir=c.get("elixirCost", 0),
-            icon=icons.get("evolutionMedium") if evolved else icons.get("medium"),
+            icon=icon,
             evolved=evolved,
+            hero=hero,
+            rarity=c.get("rarity", "common"),
         ))
 
     names = [c.name for c in cards]

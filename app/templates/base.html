@@ -4,21 +4,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Clash-inDepth-Royale{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
 </head>
 <body>
+  {% from "_icons.html" import crown %}
   <header class="topbar">
-    <a href="/" class="brand">Clash-inDepth-<span>Royale</span></a>
+    <a href="/" class="brand">{{ crown(true, "gold", 28) }}<span>Clash-inDepth-<em>Royale</em></span></a>
     <form action="/lookup" class="mini-search">
       <input name="tag" placeholder="#PLAYERTAG" aria-label="Player tag">
-      <button>Analyze</button>
+      <button class="btn btn-gold">Scout</button>
     </form>
   </header>
   <main>
     {% block content %}{% endblock %}
   </main>
   <footer>
-    Not affiliated with Supercell. Data from the official Clash Royale API.
+    Fan-made coaching tool. Not affiliated with or endorsed by Supercell. Data from the official Clash Royale API.
   </footer>
 </body>
 </html>

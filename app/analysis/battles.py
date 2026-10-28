@@ -46,6 +46,8 @@ class Battle:
     opp_level: float
     elixir_leaked: float | None
     used_main_deck: bool
+    # (name, icon url) for showing the opponent's deck.
+    opp_deck: list[tuple[str, str | None]] = field(default_factory=list)
 
     @property
     def level_gap(self) -> float:
@@ -66,6 +68,7 @@ class Nemesis:
     card: str
     losses_with: int
     games_with: int
+    icon: str | None = None
 
 
 @dataclass
@@ -114,6 +117,7 @@ def parse_battle(raw: dict, main_deck: set[str]) -> Battle | None:
         opp_level=round(average_level(opp["cards"]), 1),
         elixir_leaked=me.get("elixirLeaked"),
         used_main_deck=set(my_cards) == main_deck,
+        opp_deck=[(c["name"], c.get("iconUrls", {}).get("medium")) for c in opp["cards"]],
     )
 
 
@@ -142,8 +146,9 @@ def summarize(raw_battles: list[dict], main_deck: set[str]) -> BattleSummary:
                 summary.big_gap_losses.append(b)
 
     counted_losses = sum(1 for b in battles if b.result == "loss" and not b.possible_afk)
+    icons = {name: icon for b in battles for name, icon in b.opp_deck}
     summary.nemeses = [
-        Nemesis(card, n, in_games[card])
+        Nemesis(card, n, in_games[card], icons.get(card))
         for card, n in in_losses.most_common()
         if n >= 3 and n / counted_losses >= 0.4
     ][:5]

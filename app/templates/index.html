@@ -1,25 +1,40 @@
 {% extends "base.html" %}
+{% from "_icons.html" import crown, trophy, elixir %}
 {% block content %}
 <section class="hero">
-  <h1>See what's holding your game back</h1>
-  <p class="lead">Enter your player tag. We'll look at your deck and your recent battles and tell you the three things to fix first.</p>
+  <div class="hero-crowns">{{ crown(true, "blue", 44) }}{{ crown(true, "gold", 72) }}{{ crown(true, "red", 44) }}</div>
+  <h1>Know why you<br><span class="gold-text">win and lose</span></h1>
+  <p class="lead">Drop your player tag. We scout your deck and your last battles and tell you the three things to fix before your next match.</p>
 
   <form action="/lookup" class="big-search">
-    <input name="tag" value="{{ tag }}" placeholder="#PV20Q9QQ8" aria-label="Player tag" autofocus required>
-    <button>Analyze my game</button>
+    <span class="hash">#</span>
+    <input name="tag" value="{{ tag }}" placeholder="PV20Q9QQ8" aria-label="Player tag" autofocus required autocomplete="off">
+    <button class="btn btn-gold btn-big">Battle!</button>
   </form>
 
   {% if error %}<p class="error">{{ error }}</p>{% endif %}
 
   <details class="help">
     <summary>Where do I find my player tag?</summary>
-    <p>Open Clash Royale, tap your name in the top left, and your tag is shown under your name. It starts with <code>#</code>.</p>
+    <p>Open Clash Royale and tap your name in the top left. Your tag is under your name and starts with <code>#</code>.</p>
   </details>
 </section>
 
 <section class="features">
-  <div><h3>Fix these first</h3><p>Your top three problems, in plain words, with what to do about them.</p></div>
-  <div><h3>Deck doctor</h3><p>Checks that your deck has a win condition, air defense, spells and more.</p></div>
-  <div><h3>Battle review</h3><p>Your recent games, and the cards that keep beating you.</p></div>
+  <div class="panel feature">
+    <div class="feature-ico">{{ crown(true, "red", 40) }}</div>
+    <h3>Fix these first</h3>
+    <p>Your top three problems in plain words, and exactly what to do about each.</p>
+  </div>
+  <div class="panel feature">
+    <div class="feature-ico">{{ elixir("?", 40) }}</div>
+    <h3>Deck doctor</h3>
+    <p>Checks your deck for a win condition, air defense, spells, splash and a tank killer.</p>
+  </div>
+  <div class="panel feature">
+    <div class="feature-ico">{{ trophy(40) }}</div>
+    <h3>Battle review</h3>
+    <p>Your recent battles, card levels side by side, and the cards that keep beating you.</p>
+  </div>
 </section>
 {% endblock %}

@@ -1,131 +1,170 @@
 {% extends "base.html" %}
+{% from "_icons.html" import crown, crowns, trophy, elixir, chest %}
 {% block title %}{{ r.player.name }} · Clash-inDepth-Royale{% endblock %}
 {% block content %}
 {% set p = r.player %}
 {% set s = r.summary %}
 
-<section class="snapshot card">
-  <div>
-    <h1>{{ p.name }} <span class="muted">{{ p.tag }}</span></h1>
-    <p class="muted">
-      {{ p.arena.name if p.arena }} · King level {{ p.expLevel }}
-      {% if p.clan %} · {{ p.clan.name }}{% endif %}
-    </p>
+{# ---------- Player banner ---------- #}
+<section class="banner">
+  <div class="king-badge" title="King level">{{ p.expLevel }}</div>
+  <div class="banner-name">
+    <h1>{{ p.name }}</h1>
+    <p>{{ p.tag }}{% if p.clan %} · <span class="clan">{{ p.clan.name }}</span>{% endif %}</p>
+    {% if p.arena %}<span class="arena-pill">{{ p.arena.name }}</span>{% endif %}
   </div>
-  <div class="stats">
-    <div><b>{{ p.trophies }}</b><span>Trophies</span></div>
-    <div><b>{{ p.bestTrophies }}</b><span>Best</span></div>
+  <div class="banner-stats">
+    <div class="stat">{{ trophy(30) }}<b>{{ p.trophies }}</b><span>Trophies</span></div>
     {% if s.games %}
-    <div><b>{{ (s.win_rate * 100) | round | int }}%</b><span>Recent win rate</span></div>
-    <div><b>{{ s.wins }}–{{ s.losses }}</b><span>Last {{ s.games }} games</span></div>
+    <div class="stat"><span class="ring" style="--pct: {{ (s.win_rate * 100) | round | int }}"><b>{{ (s.win_rate * 100) | round | int }}%</b></span><span>Win rate</span></div>
+    <div class="stat"><b><i class="w">{{ s.wins }}</i>–<i class="l">{{ s.losses }}</i></b><span>Last {{ s.games }} battles</span></div>
     {% endif %}
   </div>
 </section>
 
+{# ---------- Tips ---------- #}
 <section>
-  <h2>Fix these first</h2>
+  <h2 class="section-title">Fix these first</h2>
   {% if r.top_tips %}
-  <ol class="tips">
+  <ol class="quests">
     {% for t in r.top_tips %}
-    <li class="tip sev-{{ t.severity_label }}">
-      <h3>{{ t.title }}</h3>
-      <p>{{ t.why }}</p>
-      <p class="action"><b>What to do:</b> {{ t.action }}</p>
+    <li class="quest sev-{{ t.severity_label }}">
+      <div class="quest-num">{{ loop.index }}</div>
+      <div class="quest-body">
+        <span class="sev-tag">{{ {'high': 'Big problem', 'medium': 'Worth fixing', 'low': 'Small tweak'}[t.severity_label] }}</span>
+        <h3>{{ t.title }}</h3>
+        <p>{{ t.why }}</p>
+        <p class="do"><b>Do this:</b> {{ t.action }}</p>
+      </div>
     </li>
     {% endfor %}
   </ol>
   {% else %}
-  <p class="card">Nothing big to fix. Your deck covers the basics and your recent games look solid.</p>
+  <div class="panel empty">{{ crown(true, "gold", 36) }}<p>Nothing big to fix. Your deck covers the basics and your recent battles look strong.</p></div>
   {% endif %}
   {% if r.more_tips %}
   <details class="more">
     <summary>{{ r.more_tips | length }} more tip{{ 's' if r.more_tips | length > 1 }}</summary>
-    <ul class="tips small">
+    <ul class="quests small">
       {% for t in r.more_tips %}
-      <li class="tip sev-{{ t.severity_label }}"><h3>{{ t.title }}</h3><p>{{ t.why }} <b>{{ t.action }}</b></p></li>
+      <li class="quest sev-{{ t.severity_label }}"><div class="quest-body"><h3>{{ t.title }}</h3><p>{{ t.why }}</p><p class="do"><b>Do this:</b> {{ t.action }}</p></div></li>
       {% endfor %}
     </ul>
   </details>
   {% endif %}
 </section>
 
+{# ---------- Deck ---------- #}
 <section>
-  <h2>Deck doctor</h2>
-  <div class="card">
+  <h2 class="section-title">Deck doctor</h2>
+  <div class="panel deck-panel">
+    <div class="deck-head">
+      <span>Your battle deck</span>
+      <span class="avg">Average {{ elixir(r.deck.avg_elixir, 30) }}</span>
+    </div>
     <div class="deck">
       {% for c in r.deck.cards %}
-      <figure>
-        {% if c.icon %}<img src="{{ c.icon }}" alt="{{ c.name }}" loading="lazy">{% endif %}
-        <figcaption>{{ c.name }}<br><span class="muted">Lvl {{ c.level }}{% if c.evolved %} · Evo{% endif %}</span></figcaption>
+      <figure class="cr-card {{ c.rarity }} {{ 'evo' if c.evolved }}">
+        <div class="art">
+          {% if c.icon %}<img src="{{ c.icon }}" alt="{{ c.name }}" loading="lazy">{% endif %}
+          {% if c.elixir %}<span class="cost">{{ elixir(c.elixir, 24) }}</span>{% endif %}
+        </div>
+        <figcaption><span class="lvl">Lvl {{ c.level }}</span>{% if c.hero %}<span class="evo-tag hero">HERO</span>{% elif c.evolved %}<span class="evo-tag">EVO</span>{% endif %}</figcaption>
+        <div class="card-name">{{ c.name }}</div>
       </figure>
       {% endfor %}
     </div>
-    <p>Average cost: <b>{{ r.deck.avg_elixir }}</b> elixir
-      <span class="muted" title="Most decks sit between 3.0 and 4.2. Lower is faster, higher is heavier.">(?)</span></p>
+
+    <h3 class="sub">Does your deck have what it needs?</h3>
     <ul class="roles">
       {% for role in r.deck.roles %}
-      <li class="{{ 'ok' if role.ok else 'missing' }}" title="{{ role.hint }}">
-        <span class="mark">{{ '✓' if role.ok else '✗' }}</span>
-        <b>{{ role.label }}</b>
-        <span class="muted">{{ role.cards | join(', ') if role.cards else 'none' }}</span>
+      <li class="{{ 'ok' if role.ok else 'missing' }}">
+        <span class="shield">{{ '✓' if role.ok else '!' }}</span>
+        <div>
+          <b>{{ role.label }}</b>
+          <span class="role-cards">{{ role.cards | join(', ') if role.cards else 'Missing' }}</span>
+          <span class="role-hint">{{ role.hint }}</span>
+        </div>
       </li>
       {% endfor %}
     </ul>
+
     {% if r.deck.upgrade_priority %}
-    <p><b>Upgrade order:</b>
-      {% for c, gap in r.deck.upgrade_priority %}{{ c.name }} ({{ gap }} behind){{ ', ' if not loop.last }}{% endfor %}
-    </p>
+    <div class="upgrade">
+      <b>Upgrade next:</b>
+      {% for c, gap in r.deck.upgrade_priority %}<span class="chip">{{ c.name }} <i>−{{ gap }}</i></span>{% endfor %}
+    </div>
     {% endif %}
   </div>
 </section>
 
+{# ---------- Nemesis ---------- #}
 {% if s.nemeses %}
 <section>
-  <h2>Cards that keep beating you</h2>
+  <h2 class="section-title red">Cards that keep beating you</h2>
   <div class="nemeses">
     {% for n in s.nemeses %}
-    <div class="card"><b>{{ n.card }}</b><p class="muted">In {{ n.losses_with }} losses · faced {{ n.games_with }} times</p></div>
+    <div class="panel nemesis">
+      {% if n.icon %}<img src="{{ n.icon }}" alt="" loading="lazy">{% endif %}
+      <div>
+        <b>{{ n.card }}</b>
+        <span>In {{ n.losses_with }} of your losses</span>
+        <span class="muted">Faced {{ n.games_with }} times</span>
+      </div>
+    </div>
     {% endfor %}
   </div>
 </section>
 {% endif %}
 
+{# ---------- Battles ---------- #}
 <section>
-  <h2>Battle review</h2>
+  <h2 class="section-title">Battle log</h2>
   {% if s.battles %}
-  <div class="table-wrap">
-    <table class="battles">
-      <thead><tr><th>Result</th><th>Mode</th><th>Opponent</th><th>Card levels <span title="Your average card level vs your opponent's">(?)</span></th><th>Trophies</th><th></th></tr></thead>
-      <tbody>
-      {% for b in s.battles %}
-      <tr class="{{ b.result }}">
-        <td><b>{{ b.result | upper }}</b> {{ b.my_crowns }}–{{ b.opp_crowns }}</td>
-        <td>{{ b.mode }}<br><span class="muted">{{ b.time.strftime('%b %d, %H:%M') }}</span></td>
-        <td>{{ b.opp_name }}<br><span class="muted small">{{ b.opp_cards | join(', ') }}</span></td>
-        <td class="{{ 'gap' if b.level_gap >= 1.5 }}">{{ b.my_level }} vs {{ b.opp_level }}</td>
-        <td>{% if b.trophy_change is not none %}{{ '%+d' | format(b.trophy_change) }}{% endif %}</td>
-        <td class="small">
-          {% if not b.used_main_deck %}<span class="badge">Other deck</span>{% endif %}
-          {% if b.possible_afk %}<span class="badge" title="Lots of unused elixir; maybe a disconnect.">Possible disconnect</span>{% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+  <div class="battle-list">
+    {% for b in s.battles %}
+    <article class="battle {{ b.result }}">
+      <div class="battle-top">
+        <span class="result">{{ {'win': 'Victory', 'loss': 'Defeat', 'draw': 'Draw'}[b.result] }}</span>
+        <span class="mode">{{ b.mode }} · {{ b.time.strftime('%b %d, %H:%M') }} UTC</span>
+        {% if b.trophy_change is not none %}<span class="tchange {{ 'up' if b.trophy_change > 0 else 'down' }}">{{ trophy(16) }} {{ '%+d' | format(b.trophy_change) }}</span>{% endif %}
+      </div>
+      <div class="scoreline">
+        <div class="side me">{{ crowns(b.my_crowns, 'blue') }}<span class="lvl-avg">Lvl {{ b.my_level }}</span></div>
+        <div class="vs">VS</div>
+        <div class="side opp">{{ crowns(b.opp_crowns, 'red') }}<span class="lvl-avg {{ 'gap' if b.level_gap >= 1.5 }}">Lvl {{ b.opp_level }}</span></div>
+      </div>
+      <div class="opp-row">
+        <span class="opp-name">{{ b.opp_name }}</span>
+        <div class="mini-deck">
+          {% for name, icon in b.opp_deck %}{% if icon %}<img src="{{ icon }}" alt="{{ name }}" title="{{ name }}" loading="lazy">{% endif %}{% endfor %}
+        </div>
+      </div>
+      {% if not b.used_main_deck or b.possible_afk or b.level_gap >= 1.5 %}
+      <div class="flags">
+        {% if b.level_gap >= 1.5 %}<span class="flag red">Outleveled by {{ '%.1f' | format(b.level_gap) }}</span>{% endif %}
+        {% if not b.used_main_deck %}<span class="flag">Other deck</span>{% endif %}
+        {% if b.possible_afk %}<span class="flag" title="Lots of unused elixir; maybe a disconnect.">Possible disconnect</span>{% endif %}
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
   </div>
   {% else %}
-  <p class="card">No recent battles to analyze yet. Play a few games and come back.</p>
+  <div class="panel empty"><p>No recent battles yet. Play a few and come back.</p></div>
   {% endif %}
 </section>
 
+{# ---------- Chests ---------- #}
 {% if r.chests %}
 <section>
-  <h2>Upcoming chests</h2>
+  <h2 class="section-title">Chest cycle</h2>
   <div class="chests">
     {% for c in r.chests if c.in_chests < 6 or c.special %}
     <div class="chest {{ 'special' if c.special }}">
+      {{ chest(c.kind) }}
       <b>{{ c.name }}</b>
-      <span class="muted">{{ 'Next' if c.in_chests == 0 else '+' ~ c.in_chests }}</span>
+      <span class="when">{{ 'Next!' if c.in_chests == 0 else '+' ~ c.in_chests }}</span>
     </div>
     {% endfor %}
   </div>

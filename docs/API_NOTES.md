@@ -38,6 +38,8 @@ chests away it is. Also lists far-off special chests (e.g. Legendary Chest at 55
 
 - **Card levels are per rarity.** A max rare is `level: 14, maxLevel: 14`. The
   in-game level is `level + (16 - maxLevel)` (see `analysis/levels.py`).
+- **Evolutions and heroes share `evolutionLevel`.** `1` with an
+  `evolutionMedium` icon is an evolution; `2` with a `heroMedium` icon is a hero.
 - **`elixirLeaked` is a match total.** We don't know when or why it leaked, and
   sometimes waiting is the right play. We don't base tips on it; we only use very
   high values (≥12) to label a loss as a possible disconnect.
