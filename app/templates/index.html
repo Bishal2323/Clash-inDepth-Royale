@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>See what's holding your game back</h1>
+  <p class="lead">Enter your player tag. We'll look at your deck and your recent battles and tell you the three things to fix first.</p>
+
+  <form action="/lookup" class="big-search">
+    <input name="tag" value="{{ tag }}" placeholder="#PV20Q9QQ8" aria-label="Player tag" autofocus required>
+    <button>Analyze my game</button>
+  </form>
+
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+  <details class="help">
+    <summary>Where do I find my player tag?</summary>
+    <p>Open Clash Royale, tap your name in the top left, and your tag is shown under your name. It starts with <code>#</code>.</p>
+  </details>
+</section>
+
+<section class="features">
+  <div><h3>Fix these first</h3><p>Your top three problems, in plain words, with what to do about them.</p></div>
+  <div><h3>Deck doctor</h3><p>Checks that your deck has a win condition, air defense, spells and more.</p></div>
+  <div><h3>Battle review</h3><p>Your recent games, and the cards that keep beating you.</p></div>
+</section>
+{% endblock %}

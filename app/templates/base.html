@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Clash-inDepth-Royale{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a href="/" class="brand">Clash-inDepth-<span>Royale</span></a>
+    <form action="/lookup" class="mini-search">
+      <input name="tag" placeholder="#PLAYERTAG" aria-label="Player tag">
+      <button>Analyze</button>
+    </form>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    Not affiliated with Supercell. Data from the official Clash Royale API.
+  </footer>
+</body>
+</html>
