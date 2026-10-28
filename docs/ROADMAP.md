@@ -24,8 +24,8 @@
 - [ ] Background refresh for returning players
 
 ## v0.4: Deploy
-- [ ] Hosting with a fixed IP or the RoyaleAPI proxy
-- [ ] Postgres instead of SQLite
+- [x] Vercel config and RoyaleAPI proxy support (see DEPLOY.md)
+- [ ] Hosted Postgres instead of SQLite, so history survives on Vercel
 - [ ] Rate limiting and better caching
 
 ## Later: Video analysis

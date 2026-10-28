@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import sqlite3
 import time
 from contextlib import asynccontextmanager
 
@@ -12,6 +14,7 @@ from .cr_client import ApiError, ClashClient, InvalidTag, PlayerNotFound, normal
 from .report import build_report
 from .storage import BattleStore
 
+logger = logging.getLogger(__name__)
 templates = Jinja2Templates(directory=config.APP_DIR / "templates")
 
 # tag -> (fetched_at, player, battles, chests)
@@ -21,7 +24,11 @@ _cache: dict[str, tuple] = {}
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.client = ClashClient(config.API_KEY, config.API_BASE_URL)
-    app.state.store = BattleStore(config.DB_PATH)
+    try:
+        app.state.store = BattleStore(config.DB_PATH)
+    except (sqlite3.Error, OSError):
+        logger.exception("Could not open battle store at %s; running without history", config.DB_PATH)
+        app.state.store = None
     yield
     await app.state.client.aclose()
 
@@ -77,10 +84,21 @@ async def player_report(request: Request, tag: str):
     except ApiError as e:
         return render_home(request, str(e), tag, 502)
 
-    store: BattleStore = request.app.state.store
-    store.save(clean, battles)
-    report = build_report(player, store.recent(clean), chests)
+    store: BattleStore | None = request.app.state.store
+    if store:
+        try:
+            store.save(clean, battles)
+            battles = store.recent(clean)
+        except sqlite3.Error:
+            # Saved history is a bonus; the report still works from the API's battles.
+            logger.exception("Battle store unavailable")
+    report = build_report(player, battles, chests)
     return templates.TemplateResponse(request, "report.html", {"r": report})
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return RedirectResponse("/static/favicon.svg", status_code=307)
 
 
 @app.get("/health")

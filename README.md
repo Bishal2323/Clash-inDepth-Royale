@@ -17,7 +17,7 @@ Requires Python 3.11+.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 cp .env.example .env   # then paste your API key into .env
 ```
 
@@ -27,7 +27,7 @@ create the key for the IP of the machine that runs the app.
 ## Run
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn index:app --reload
 ```
 
 Open http://localhost:8000 and enter a player tag.
@@ -45,7 +45,7 @@ pytest
 
 ```
 app/
-  main.py          web routes
+  web.py           web routes (index.py at the root re-exports the app)
   cr_client.py     Clash Royale API client and tag validation
   storage.py       SQLite store that keeps every battle we've seen
   report.py        puts the analysis together for the page
@@ -68,5 +68,6 @@ tests/
 - [API notes](docs/API_NOTES.md): what the API returns and its quirks
 - [Coaching rules](docs/COACHING_RULES.md): every tip the app can give and when
 - [Roadmap](docs/ROADMAP.md)
+- [Deploying to Vercel](docs/DEPLOY.md)
 
 Not affiliated with or endorsed by Supercell.
